@@ -23,29 +23,29 @@ endif()
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_OPT} ${CXX_OPT} -Wall -pedantic -Wextra -O2")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
 
-if(NOT DEFINED NO_TESTS)
-  include(ExternalProject)
+#if(NOT DEFINED NO_TESTS)
+#  include(ExternalProject)
 
-  ExternalProject_Add(
-    catch
-    PREFIX ${CMAKE_BINARY_DIR}/catch
-    GIT_TAG Catch1.x
-    GIT_REPOSITORY https://github.com/catchorg/Catch2
-    TIMEOUT 10
-    UPDATE_COMMAND git pull
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    LOG_DOWNLOAD ON
-    )
+#  ExternalProject_Add(
+#    catch
+#    PREFIX ${CMAKE_BINARY_DIR}/catch
+#    GIT_TAG Catch1.x
+#    GIT_REPOSITORY https://github.com/catchorg/Catch2
+#    TIMEOUT 10
+#    UPDATE_COMMAND git pull
+#    CONFIGURE_COMMAND ""
+#    BUILD_COMMAND ""
+#    INSTALL_COMMAND ""
+#    LOG_DOWNLOAD ON
+#    )
 
   # Expose required variable (CATCH_INCLUDE_DIR) to parent scope
-  ExternalProject_Get_Property(catch source_dir)
-  set(CATCH_INCLUDE_DIR ${source_dir}/include CACHE INTERNAL "Path to include folder for Catch")
+#  ExternalProject_Get_Property(catch source_dir)
+#  set(CATCH_INCLUDE_DIR ${source_dir}/include CACHE INTERNAL "Path to include folder for Catch")
 
   # Includes Catch in the project:
   #add_subdirectory(${EXT_PROJECTS_DIR}/catch)
-  include_directories(${CATCH_INCLUDE_DIR} ${COMMON_INCLUDES})
+#  include_directories(${CATCH_INCLUDE_DIR} ${COMMON_INCLUDES})
 
   add_definitions(-DTEST_FILES="${CMAKE_CURRENT_SOURCE_DIR}/test_files/")
 
@@ -67,8 +67,8 @@ if(NOT DEFINED NO_TESTS)
     src/TestFormatters.cc
     )
 
-  add_dependencies(j4-dmenu-tests catch)
-endif(NOT DEFINED NO_TESTS)
+ # add_dependencies(j4-dmenu-tests catch)
+ #endif(NOT DEFINED NO_TESTS)
 
 
 add_executable(
