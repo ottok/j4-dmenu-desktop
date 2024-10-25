@@ -18,7 +18,7 @@ _j4-dmenu-desktop()
 			return 0
 			;;
 		--desktop-file-quirks)
-			COMPREPLY=( $(compgen -o filenames -W "wine" -- "$cur" ) )
+			COMPREPLY=( $(compgen -o filenames -W "wine multispace" -- "$cur" ) )
 			return 0
 			;;
 		-h|--help|--version)
