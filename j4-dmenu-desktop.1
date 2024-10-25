@@ -129,6 +129,11 @@ desktop file parsing mechanism to accomodate desktop files not conforming to the
 Desktop Entry Specification.
 Several modes may be specified.
 They shall be separated by a comma (,).
+All modes not specified in
+.Fl Fl desktop-file-quirks
+are disabled.
+To disable all modes, use
+.Fl Fl strict-parsing .
 A warning is printed when a desktop file makes use of an enabled quirk.
 .Ar ARGS
 can contain the following modes:
