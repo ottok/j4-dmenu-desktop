@@ -40,3 +40,17 @@ option(
     value: false,
     description: 'FOR DEVELOPERS ONLY! Optimise j4-dmenu-desktop for good coverage reports.'
 )
+
+option(
+    'enabled-shell-completions',
+    type: 'array',
+    choices: ['bash', 'fish', 'zsh'],
+    value: ['bash', 'fish', 'zsh'],
+    description: 'Shells to generate completions for.'
+)
+
+option(
+    'generate-shell-completions',
+    type: 'feature',
+    description: 'Use crazy-complete to generate completions. Completions for releases are also available as release artifacts.'
+)
