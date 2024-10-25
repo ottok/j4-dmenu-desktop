@@ -1,8 +1,16 @@
 # This build file depends on several variables defined in src/meson.build
 
 if not get_option('enable-tests')
+  summary(
+    'unit tests',
+    false,
+    section: 'Optional build components',
+    bool_yn: true,
+  )
   subdir_done()
 endif
+
+summary('unit tests', true, section: 'Optional build components', bool_yn: true)
 
 # The oldest version of Catch2 I was able to verify is v3.3.0. v2 versions
 # won't likely work. version isn't set to >3.3.0 because 3.3.0 is the oldest

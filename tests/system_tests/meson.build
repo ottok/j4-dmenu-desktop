@@ -6,6 +6,13 @@ pytest_exe = find_program(
   required: false,
 )
 
+summary(
+  'extended pytest system tests',
+  pytest_exe.found(),
+  section: 'Optional build components',
+  bool_yn: true,
+)
+
 if pytest_exe.found()
   test(
     'pytest-system-tests',

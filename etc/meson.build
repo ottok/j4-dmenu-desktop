@@ -1,6 +1,12 @@
 enabled_completions = get_option('enabled-shell-completions')
 
 if enabled_completions == []
+  summary(
+    'generated shell completions',
+    false,
+    section: 'Optional build components',
+    bool_yn: true,
+  )
   subdir_done()
 endif
 
@@ -10,6 +16,13 @@ crazy_complete_exe = find_program(
   version: '>=0.1.0',
   disabler: true,
   required: get_option('generate-shell-completions'),
+)
+
+summary(
+  'generated shell completions',
+  crazy_complete_exe.found(),
+  section: 'Optional build components',
+  bool_yn: true,
 )
 
 shells = {
