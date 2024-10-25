@@ -68,6 +68,7 @@
 #include "I3Exec.hh"
 #include "LocaleSuffixes.hh"
 #include "NotifyBase.hh"
+#include "ParsingQuirks.hh"
 #include "SearchPath.hh"
 #include "Utilities.hh"
 #include "version.hh"
@@ -188,9 +189,9 @@ static void print_usage(FILE *f) {
         "        Specify a log file\n"
         "    --log-file-level=ERROR | WARNING | INFO | DEBUG\n"
         "        Set file log level\n"
-        "    --desktop-file-compatibility=wine\n"
+        "    --desktop-file-compatibility=wine,multispace\n"
         "        Enable nonconformant desktop file parsing quirks. Available "
-        "modes: wine.\n"
+        "modes: wine, multispace.\n"
         "    --strict-parsing\n"
         "        Enable strict desktop file parsing. Mutaly exclusive with\n"
         "        --desktop-file-compatibility.\n"
@@ -666,10 +667,9 @@ class NormalExecutable final : public BaseExecutable
 public:
     NormalExecutable(std::string terminal, std::string wrapper,
                      CMDLineTerm::term_assembler term_assembler,
-                     bool wine_compatibility_mode)
+                     ParsingQuirks quirks)
         : terminal(std::move(terminal)), wrapper(std::move(wrapper)),
-          term_assembler(term_assembler),
-          wine_compatibility_mode(wine_compatibility_mode) {}
+          term_assembler(term_assembler), quirks(quirks) {}
 
     // This class could be copied or moved, but it wouldn't make much sense in
     // current implementation. This prevents accidental copy/move.
@@ -682,10 +682,9 @@ public:
     static stringlist_t prepare_processed_argv(
         const RunPhase::CommandRetrievalLoop::CommandInfoVariant &command_info,
         const std::string &wrapper, const std::string &terminal,
-        CMDLineTerm::term_assembler term_assembler,
-        bool wine_compatibility_mode) {
+        CMDLineTerm::term_assembler term_assembler, ParsingQuirks quirks) {
 
-        using CMDLineAssembly::Exec_invalid_escape;
+        using CMDLineAssembly::invalid_Exec;
 
         std::vector<std::string> command_array;
 
@@ -704,9 +703,9 @@ public:
 
             try {
                 command_array = CMDLineAssembly::convert_exec_to_command(
-                    info.app->exec, wine_compatibility_mode);
-            } catch (const Exec_invalid_escape &e) {
-                throw Exec_invalid_escape(
+                    info.app->exec, quirks);
+            } catch (const invalid_Exec &e) {
+                throw invalid_Exec(
                     (std::string) "Error while processing selected desktop "
                                   "file '" +
                     info.app->location + "': " + e.what());
@@ -744,7 +743,7 @@ public:
 
         execute_app(prepare_processed_argv(command_info, this->wrapper,
                                            this->terminal, this->term_assembler,
-                                           this->wine_compatibility_mode));
+                                           this->quirks));
         abort();
     }
 
@@ -752,7 +751,7 @@ private:
     std::string terminal;
     std::string wrapper; // empty when no wrapper is in use
     CMDLineTerm::term_assembler term_assembler;
-    bool wine_compatibility_mode;
+    ParsingQuirks quirks;
 };
 
 // This "executable" is used to handle --no-exec
@@ -761,10 +760,9 @@ class FakeExecutable final : public BaseExecutable
 public:
     FakeExecutable(std::string terminal, std::string wrapper,
                    CMDLineTerm::term_assembler term_assembler,
-                   bool wine_compatibility_mode)
+                   ParsingQuirks quirks)
         : terminal(std::move(terminal)), wrapper(std::move(wrapper)),
-          term_assembler(term_assembler),
-          wine_compatibility_mode(wine_compatibility_mode) {}
+          term_assembler(term_assembler), quirks(quirks) {}
 
     // This class could be copied or moved, but it wouldn't make much sense in
     // current implementation. This prevents accidental copy/move.
@@ -777,7 +775,7 @@ public:
                      &command_info) override {
         auto argv = NormalExecutable::prepare_processed_argv(
             command_info, this->wrapper, this->terminal, this->term_assembler,
-            wine_compatibility_mode);
+            this->quirks);
         std::string command_string =
             CMDLineAssembly::convert_argv_to_string(argv);
         fmt::print("{}\n", command_string);
@@ -787,7 +785,7 @@ private:
     std::string terminal;
     std::string wrapper; // empty when no wrapper is in use
     CMDLineTerm::term_assembler term_assembler;
-    bool wine_compatibility_mode;
+    ParsingQuirks quirks;
 };
 
 class I3Executable final : public BaseExecutable
@@ -795,10 +793,9 @@ class I3Executable final : public BaseExecutable
 public:
     I3Executable(std::string terminal, std::string i3_ipc_path,
                  CMDLineTerm::term_assembler term_assembler,
-                 bool wine_compatibility_mode)
+                 ParsingQuirks quirks)
         : terminal(std::move(terminal)), i3_ipc_path(std::move(i3_ipc_path)),
-          term_assembler(term_assembler),
-          wine_compatibility_mode(wine_compatibility_mode) {}
+          term_assembler(term_assembler), quirks(quirks) {}
 
     // This class could be copied or moved, but it wouldn't make much sense in
     // current implementation. This prevents accidental copy/move.
@@ -816,7 +813,7 @@ public:
         using DesktopCommandInfo =
             RunPhase::CommandRetrievalLoop::DesktopCommandInfo;
 
-        using CMDLineAssembly::Exec_invalid_escape;
+        using CMDLineAssembly::invalid_Exec;
 
         if (std::holds_alternative<CustomCommandInfo>(command_info)) {
             const auto &info = std::get<CustomCommandInfo>(command_info);
@@ -829,9 +826,9 @@ public:
             std::vector<std::string> command_array;
             try {
                 command_array = CMDLineAssembly::convert_exec_to_command(
-                    info.app->exec, this->wine_compatibility_mode);
-            } catch (const Exec_invalid_escape &e) {
-                throw Exec_invalid_escape(
+                    info.app->exec, this->quirks);
+            } catch (const invalid_Exec &e) {
+                throw invalid_Exec(
                     (std::string) "Error while processing selected desktop "
                                   "file '" +
                     info.app->location + "': " + e.what());
@@ -873,7 +870,7 @@ private:
     std::string terminal;
     std::string i3_ipc_path;
     CMDLineTerm::term_assembler term_assembler;
-    bool wine_compatibility_mode;
+    ParsingQuirks quirks;
 };
 }; // namespace ExecutePhase
 
@@ -1110,7 +1107,7 @@ int main(int argc, char **argv) {
     bool use_i3_ipc = false;
     bool skip_i3_check = false;
     bool prune_bad_usage_log_entries = false;
-    bool wine_compatibility_mode = true;
+    ParsingQuirks quirks{true, true};
 
     // This variable doesn't have much use, wine_compatibility_mode is more
     // important. It is only used to detect if both mutaly exclusive flags have
@@ -1276,17 +1273,18 @@ int main(int argc, char **argv) {
                 exit(1);
             }
             parsing_mode = QUIRKS;
+            quirks.disable();
             arg = optarg;
-            // If more compatibility flags are introduced in the future, they
-            // should be handled like a list of words separated by comma ','.
-            // j4dd invocations could look something like this:
-            // j4-dmenu-desktop --desktop-file-compatibility wine,whitespace,etc
-            if (arg == "wine") {
-                wine_compatibility_mode = true;
-            } else {
-                fmt::print(stderr, "Invalid compatibility mode supplied to "
-                                   "--desktop-file-compatibility!\n");
-                exit(1);
+            for (const auto &curr_arg : split((std::string)arg, ',')) {
+                if (curr_arg == "wine") {
+                    quirks.extra_wine_escaping = true;
+                } else if (curr_arg == "multispace") {
+                    quirks.multiple_spaces_in_exec = true;
+                } else {
+                    fmt::print(stderr, "Invalid compatibility mode supplied to "
+                                       "--desktop-file-compatibility!\n");
+                    exit(1);
+                }
             }
             break;
         case 'R':
@@ -1298,7 +1296,7 @@ int main(int argc, char **argv) {
                 exit(1);
             }
             parsing_mode = STRICT;
-            wine_compatibility_mode = false;
+            quirks.disable();
             break;
         case 'E':
             puts(version());
@@ -1463,8 +1461,7 @@ int main(int argc, char **argv) {
             SPDLOG_DEBUG(" {}", *ptr);
     }
     /// Construct AppManager
-    AppManager appm(desktop_file_list, desktopenvs, std::move(locales),
-                    wine_compatibility_mode);
+    AppManager appm(desktop_file_list, desktopenvs, std::move(locales), quirks);
 
 #ifdef DEBUG
     appm.check_inner_state();
@@ -1516,16 +1513,13 @@ int main(int argc, char **argv) {
     std::unique_ptr<BaseExecutable> executor;
     if (no_exec)
         executor = std::make_unique<FakeExecutable>(
-            std::move(terminal), std::move(wrapper), term_mode,
-            wine_compatibility_mode);
+            std::move(terminal), std::move(wrapper), term_mode, quirks);
     else if (use_i3_ipc)
-        executor =
-            std::make_unique<I3Executable>(std::move(terminal), i3_ipc_path,
-                                           term_mode, wine_compatibility_mode);
+        executor = std::make_unique<I3Executable>(
+            std::move(terminal), i3_ipc_path, term_mode, quirks);
     else
         executor = std::make_unique<NormalExecutable>(
-            std::move(terminal), std::move(wrapper), term_mode,
-            wine_compatibility_mode);
+            std::move(terminal), std::move(wrapper), term_mode, quirks);
 
     try {
         if (wait_on) {
@@ -1549,7 +1543,7 @@ int main(int argc, char **argv) {
                    "Couldn't set up temporary script for terminal emulator: {}",
                    e.what());
         exit(EXIT_FAILURE);
-    } catch (const CMDLineAssembly::Exec_invalid_escape &e) {
+    } catch (const CMDLineAssembly::invalid_Exec &e) {
         fmt::print(stderr, "{}\n", e.what());
         exit(EXIT_FAILURE);
     }

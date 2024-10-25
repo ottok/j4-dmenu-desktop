@@ -37,6 +37,7 @@
 #include "Application.hh"
 #include "LineReader.hh"
 #include "LocaleSuffixes.hh"
+#include "ParsingQuirks.hh"
 #include "Utilities.hh"
 
 using std::string;
@@ -100,7 +101,7 @@ public:
     void operator=(AppManager &&) = delete;
 
     AppManager(Desktop_file_list files, stringlist_t desktopenvs,
-               LocaleSuffixes suffixes, bool wine_compatibility_mode = false);
+               LocaleSuffixes suffixes, ParsingQuirks quirks = {false, false});
 
     void remove(const string &filename, const string &base_path);
     // This function accepts path to the desktop file relative to $XDG_DATA_DIRS

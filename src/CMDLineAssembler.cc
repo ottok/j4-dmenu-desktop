@@ -110,7 +110,7 @@ std::optional<std::string> validate_exec_key(std::string_view exec_key) {
 }
 
 std::vector<std::string> convert_exec_to_command(std::string_view exec_key,
-                                                 bool wine_compatibility_mode) {
+                                                 ParsingQuirks quirks) {
     std::vector<std::string> result;
 
     std::string curr;
@@ -118,6 +118,7 @@ std::vector<std::string> convert_exec_to_command(std::string_view exec_key,
     bool escaping = false;
 
     bool has_wine_warning_been_printed = false;
+    bool has_space_warning_been_printed = false;
 
     for (char ch : exec_key) {
         if (escaping) {
@@ -135,10 +136,10 @@ std::vector<std::string> convert_exec_to_command(std::string_view exec_key,
                 curr += '\\';
                 break;
             case ' ':
-                if (wine_compatibility_mode)
+                if (quirks.extra_wine_escaping)
                     curr += ' ';
                 else {
-                    throw Exec_invalid_escape(
+                    throw invalid_Exec(
                         "Found invalid escape sequence `\\ ` in the Exec key!");
                 }
                 break;
@@ -163,11 +164,25 @@ std::vector<std::string> convert_exec_to_command(std::string_view exec_key,
                     in_quotes = true;
                     break;
                 case ' ':
+                    if (quirks.multiple_spaces_in_exec) {
+                        if (curr.empty()) {
+                            if (!has_space_warning_been_printed) {
+                                SPDLOG_WARN(
+                                    "The currently selected desktop file is "
+                                    "using multiple spaces to separate "
+                                    "arguments in its Exec key! This behavior "
+                                    "does not conform to the Desktop Entry "
+                                    "Specification! See documentation for "
+                                    "--desktop-file-quirks for more info.");
+                            }
+                            break;
+                        }
+                    }
                     result.push_back(std::move(curr));
                     curr.clear();
                     break;
                 case '\\':
-                    if (wine_compatibility_mode) {
+                    if (quirks.extra_wine_escaping) {
                         if (!has_wine_warning_been_printed) {
                             SPDLOG_WARN(
                                 "The currently selected desktop file is "
@@ -180,8 +195,7 @@ std::vector<std::string> convert_exec_to_command(std::string_view exec_key,
                         has_wine_warning_been_printed = true;
                         escaping = true;
                     } else
-                        throw Exec_invalid_escape(
-                            "Found '\\' unquoted in Exec!");
+                        throw invalid_Exec("Found '\\' unquoted in Exec!");
                     break;
                 default:
                     curr += ch;

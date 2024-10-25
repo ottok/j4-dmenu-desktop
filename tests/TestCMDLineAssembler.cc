@@ -126,9 +126,30 @@ TEST_CASE("Test Wine generated desktop file failing",
 
     if (enable_compatibility_mode) {
         auto commandline =
-            CMDLineAssembly::convert_exec_to_command(app.exec, true);
+            CMDLineAssembly::convert_exec_to_command(app.exec, {true, false});
         REQUIRE(commandline == arguments);
     } else
         REQUIRE_THROWS(CMDLineAssembly::convert_exec_to_command(
-            app.exec, enable_compatibility_mode));
+            app.exec, {enable_compatibility_mode, false}));
+}
+
+// See #181
+TEST_CASE("Test desktop files with superfluous whitespace in Exec",
+          "[CMDLineAssembler]") {
+    LocaleSuffixes ls("en_US");
+    LineReader liner;
+
+    Application app(TEST_FILES "applications/eagle-extra-spaces.desktop", liner,
+                    ls, {});
+
+    auto collapse_extra_spaces =
+        CMDLineAssembly::convert_exec_to_command(app.exec, {false, true});
+    auto no_collapse_extra_spaces =
+        CMDLineAssembly::convert_exec_to_command(app.exec, {false, false});
+
+    REQUIRE(collapse_extra_spaces ==
+            std::vector<std::string>{"eagle", "-style", "plastique"});
+    REQUIRE(
+        no_collapse_extra_spaces ==
+        std::vector<std::string>{"eagle", "", "-style", "", "", "plastique"});
 }

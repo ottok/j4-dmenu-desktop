@@ -72,7 +72,7 @@ bool validate_desktop_file_list(const Desktop_file_list &files) {
 #endif
 
 AppManager::AppManager(Desktop_file_list files, stringlist_t desktopenvs,
-                       LocaleSuffixes suffixes, bool wine_compatibility_mode)
+                       LocaleSuffixes suffixes, ParsingQuirks quirks)
     : suffixes(std::move(suffixes)), desktopenvs(desktopenvs) {
     SPDLOG_DEBUG("AppManager: Entered AppManager");
 #ifdef DEBUG
@@ -115,7 +115,7 @@ AppManager::AppManager(Desktop_file_list files, stringlist_t desktopenvs,
                 // Skip desktop file if its Exec key is malformed.
                 auto validate_exec_key =
                     CMDLineAssembly::validate_exec_key(newly_added.app->exec);
-                if (wine_compatibility_mode) {
+                if (quirks.extra_wine_escaping) {
                     if (validate_exec_key)
                         SPDLOG_DEBUG("AppManager:     Desktop file's Exec is "
                                      "malformed, but desktop file is protected "
