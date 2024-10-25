@@ -54,3 +54,10 @@ option(
     type: 'feature',
     description: 'Use crazy-complete to generate completions. Completions for releases are also available as release artifacts.'
 )
+
+option(
+    'generate-tests-shell-completion',
+    type: 'boolean',
+    value: false,
+    description: 'Generate completions for \'j4-dmenu-tests\' command. Useful for developers.'
+)

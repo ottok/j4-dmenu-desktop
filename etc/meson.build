@@ -26,15 +26,9 @@ summary(
 )
 
 shells = {
-  'bash': [
-    'j4-dmenu-desktop',
-    get_option('datadir') / 'bash-completion/completions',
-  ],
-  'fish': [
-    'j4-dmenu-desktop.fish',
-    get_option('datadir') / 'fish/vendor_completions.d',
-  ],
-  'zsh': ['_j4-dmenu-desktop', get_option('datadir') / 'zsh/site-functions'],
+  'bash': ['@0@', get_option('datadir') / 'bash-completion/completions'],
+  'fish': ['@0@.fish', get_option('datadir') / 'fish/vendor_completions.d'],
+  'zsh' : ['_@0@', get_option('datadir') / 'zsh/site-functions'],
 }
 
 completion_targets = []
@@ -47,10 +41,20 @@ foreach shell, out_file_data : shells
     completion_targets += custom_target(
       command: [crazy_complete_exe, shell, '@INPUT@', '--output', '@OUTPUT@'],
       input: 'j4-dmenu-desktop.yaml',
-      output: out_file,
+      output: out_file.format('j4-dmenu-desktop'),
       install: true,
       install_dir: install_dir,
     )
+
+    if get_option('generate-tests-shell-completion')
+      completion_targets += custom_target(
+        command: [crazy_complete_exe, shell, '@INPUT@', '--output', '@OUTPUT@'],
+        input: 'j4-dmenu-tests.yaml',
+        output: out_file.format('j4-dmenu-tests'),
+        install: true,
+        install_dir: install_dir,
+      )
+    endif
   endif
 endforeach
 
