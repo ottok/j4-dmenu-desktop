@@ -11,6 +11,9 @@ is done to speed up release builds, but developers may wish to turn this off.
 Although both systems will be supported for compatibility, **Meson should be
 preferred**. Meson provides overall better development and packaging experience.
 
+Shell completions are provided as release artifacts. See [`etc/README.md`](etc/)
+for more info.
+
 > [!WARNING]
 > Meson build system requires Meson >=1.2.0 (as marked in the `meson_version`
 field in `meson.build`). If that isn't available in your build environment,
@@ -36,6 +39,12 @@ See
 for more info.
 
 J4-dmenu-desktop won't depend on Catch2 or pytest if tests are disabled.
+
+J4-dmenu-desktop also depends on
+[crazy-complete](https://github.com/crazy-complete/crazy-complete). It is an
+**optional external** dependency. This is true for Meson only,
+j4-dmenu-desktop's CMake build system currently doesn't support generating
+completions. See [`etc/README.md`](etc/) for more info.
 
 ## Building with CMake
 Out-of-source builds are fully supported.
