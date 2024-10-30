@@ -117,6 +117,7 @@ def check_term_mode(
         str(helpers / "dmenu_selected_imitator.sh"),
         "--term-mode",
         term_mode,
+        "--strict",
         *args,
         asynchronous=True,
     )
