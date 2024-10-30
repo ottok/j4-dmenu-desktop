@@ -10,7 +10,7 @@ if enabled_completions == []
   subdir_done()
 endif
 
-crazy_complete_min_version = '0.2.0'
+crazy_complete_min_version = '0.3.0'
 
 crazy_complete_exe = find_program(
   'crazy-complete',

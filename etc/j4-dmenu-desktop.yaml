@@ -61,7 +61,7 @@ options:
 
   - option_strings: ["-v"]
     help: "be more verbose, can be specified multiple times"
-    multiple_option: true
+    repeatable: true
 
   - option_strings: ["--log-level"]
     help: "set loglevel"
