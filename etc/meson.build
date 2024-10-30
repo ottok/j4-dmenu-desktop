@@ -10,13 +10,27 @@ if enabled_completions == []
   subdir_done()
 endif
 
+crazy_complete_min_version = '0.2.0'
+
 crazy_complete_exe = find_program(
   'crazy-complete',
   native: true,
-  version: '>=0.2.0',
+  version: '>=' + crazy_complete_min_version,
   disabler: true,
   required: get_option('generate-shell-completions'),
 )
+
+if crazy_complete_exe.found() and crazy_complete_exe.version() != 'unknown'
+  crazy_complete_version = crazy_complete_exe.version()
+  if crazy_complete_version.version_compare('!=' + crazy_complete_min_version)
+    warning(
+      f'Version of crazy-complete @crazy_complete_version@ doesn\'t match the',
+      f'expected version @crazy_complete_min_version@. Build will proceed, but',
+      f'consider using version @crazy_complete_min_version@ if you have',
+      'problems with your version.'
+    )
+  endif
+endif
 
 summary(
   'generated shell completions',
