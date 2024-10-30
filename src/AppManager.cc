@@ -189,8 +189,16 @@ void AppManager::remove(const string &filename, const string &base_path) {
     Managed_application &app = app_iter->second;
     if (app.app) {
         remove_name_mapping<NameType::name>(app);
-        if (!app.app->generic_name.empty())
-            remove_name_mapping<NameType::generic_name>(app);
+        if (!app.app->generic_name.empty()) {
+            // If the desktop app has Name == GenericName, than the first call
+            // to remove_name_mapping() made above would have already removed
+            // the name. If there is no other colliding app with the same name
+            // the following call to remove_name_mapping() would segfault,
+            // because it won't be able to find any desktop app with
+            // app.app->generic_name name.
+            if (app.app->generic_name != app.app->name)
+                remove_name_mapping<NameType::generic_name>(app);
+        }
     }
 
     this->applications.erase(app_iter);
