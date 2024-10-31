@@ -92,7 +92,11 @@ TEST_CASE("Test Wine generated desktop file failing",
 
     std::optional<Application> app_optional;
     std::vector<std::string> arguments;
-    bool enable_compatibility_mode;
+    // Omitting the `= false` here can lead to some compilers identifying this
+    // variable as possibly being used without initialization, which produces
+    // a compiler warning. This is not true, code below will always initialize
+    // it, but it is also set here to silence the warnings.
+    bool enable_compatibility_mode = false;
 
     SECTION("Wine generated desktop file from issue #174") {
         app_optional.emplace(TEST_FILES "applications/wine-#174.desktop", liner,
