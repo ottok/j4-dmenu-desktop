@@ -8,6 +8,7 @@ patch_url = https://wrapdb.mesonbuild.com/v2/spdlog_1.14.1-2/get_patch
 patch_hash = d9fe1e98d330e3283214321844a89b9b339e272b91a2709c373ff47f8299942b
 source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/spdlog_1.14.1-2/spdlog-1.14.1.tar.gz
 wrapdb_version = 1.14.1-2
+diff_files = dont_install_spdlog.patch
 
 [provide]
 spdlog = spdlog_dep
