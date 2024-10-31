@@ -122,3 +122,15 @@ r3.1 released 2024-07-31
 	+ fix minor bugs
 	+ added pytest testsuite
 	+ changed signing key
+
+r3.2 to be released
+	+ added desktop file "quirk" handling, which fixes Wine and distrobox
+	  desktop files
+	+ switched to crazy-complete for shell completion generation
+	+ improved handling of invalid desktop files
+	+ fixed segfault when removing a desktop app with matching Name and
+	  GenericName in wait on mode
+	+ fixed bug in {cmdline@} in custom --term-mode
+	+ improved program execution
+	+ minor logging improvements
+	+ added informative summary of enabled optional features to Meson
