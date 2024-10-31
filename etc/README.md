@@ -35,7 +35,7 @@ Installing completions through Meson is fully supported.
 
 The third way to generate completions is to invoke `crazy-complete` manually.
 The completion file is located at
-[`etc/j4-dmenu-desktop.yaml`](../j4-dmenu-desktop.yaml).
+[`etc/j4-dmenu-desktop.yaml`](j4-dmenu-desktop.yaml).
 
 # Why crazy-complete?
 Crazy-complete is a niche project with a small user base. Because of this, I,
