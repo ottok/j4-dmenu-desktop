@@ -354,7 +354,7 @@ custom_term_assembler(const std::vector<std::string> &commandline,
     // placeholders is sorted.
     if (!placeholders.empty()) {
         std::optional<decltype(found_placeholder::arg)> last_arg;
-        decltype(found_placeholder::arg) last_pos;
+        decltype(found_placeholder::arg) last_pos = 0;
 
         // Make sure that parsed_term.placeholders is sorted.
         for (const auto &[arg, pos] : parsed_term.placeholders) {
